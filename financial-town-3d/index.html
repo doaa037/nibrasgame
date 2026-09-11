@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+<meta name="description" content="بلدتي المالية ثلاثية الأبعاد — لعبة عالم مفتوح لتعليم التربية المالية لطلاب الثانوية، ثنائية اللغة (عربي/עברית)، وفق إطار OECD/PISA. كلية القاسمي الأكاديمية."/>
+<meta name="theme-color" content="#0b2236"/>
+<title>بلدتي المالية 3D | העיירה הפיננסית שלי</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b2236'/%3E%3Ctext y='72' x='50' font-size='56' text-anchor='middle'%3E%F0%9F%8F%98%EF%B8%8F%3C/text%3E%3C/svg%3E"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&family=Tajawal:wght@400;700;800&family=Heebo:wght@400;700;800;900&family=Rubik:wght@400;700;800&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/hud.css"/>
+
+<!--
+  خريطة الاستيراد تربط الاسم "three" بالنسخة المحلّية في vendor/.
+  لماذا نسخة محلّية بدل CDN؟ لتعمل اللعبة في صفوف بإنترنت ضعيف أو
+  محجوب، ولئلّا يكسر تحديثُ مكتبةٍ خارجيةٍ الدرسَ في منتصف الحصّة.
+-->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js"
+  }
+}
+</script>
+</head>
+<body>
+
+<!-- ═══ شاشة البداية — تُبنى من main.js ═══ -->
+<div id="start-screen"></div>
+
+<!-- ═══ طبقات اللعبة ═══ -->
+<div id="game-layer" class="hidden">
+  <canvas id="game-canvas"></canvas>
+  <!-- تظليل الحوافّ (vignette): طبقة CSS واحدة تعطي عمقاً سينمائياً بلا كلفة رسم -->
+  <div id="vignette" aria-hidden="true"></div>
+
+  <!-- لافتات المباني: عناصر HTML تُسقَط فوق مواضعها ثلاثية الأبعاد -->
+  <div id="markers"></div>
+  <!-- بطاقات الأسعار ونقاط التفاعل داخل المباني -->
+  <div id="markers-inside" class="hidden"></div>
+  <!-- طبقة الانتقال بين الخارج والداخل -->
+  <div id="fade"></div>
+
+  <!-- المؤشّرات الحيّة -->
+  <div id="hud" class="ui-layer"></div>
+  <!-- سلّة التسوّق — داخل السوق فقط -->
+  <div class="ui-layer"><div id="cart-hud" class="hidden"></div></div>
+
+  <!-- أزرار الشاشة وعصا التحكّم اللمسية -->
+  <div class="ui-layer">
+    <div class="hud-buttons">
+      <button id="btn-interact" class="hud-btn" title="E">🚪</button>
+      <button id="btn-car"      class="hud-btn" title="F">🚗</button>
+      <button id="btn-phone"    class="hud-btn" title="P">📱</button>
+      <button id="btn-badges"   class="hud-btn" title="B">🏅</button>
+      <button id="btn-report"   class="hud-btn">🎓</button>
+    </div>
+    <div id="joystick"><div id="joy-knob"></div></div>
+  </div>
+
+  <!-- الحوارات واللوحات -->
+  <div id="dialog-root" class="hidden"></div>
+
+  <!-- الإشعارات -->
+  <div id="toasts"></div>
+
+  <!-- الإيقاف المؤقّت -->
+  <div id="pause-overlay" class="hidden">
+    <div class="box">
+      <h2>⏸️</h2>
+      <p class="note">Esc</p>
+    </div>
+  </div>
+</div>
+
+<noscript>
+  <div style="padding:40px;text-align:center">
+    تتطلّب اللعبة تفعيل JavaScript ودعم WebGL.<br/>
+    המשחק דורש הפעלת JavaScript ותמיכה ב-WebGL.
+  </div>
+</noscript>
+
+<!--
+  نقطة الدخول الوحيدة. باقي الوحدات تُستورَد منها بترتيب اعتمادياتها:
+    content/  البيانات والنصوص (لا تعتمد على شيء)
+    sim/      المحاكاة الاقتصادية (تعتمد على content فقط)
+    core/     محرّك العرض والإدخال (يعتمد على three)
+    world/    البلدة واللاعب والمركبات
+    ui/       الواجهة (تعتمد على sim + content)
+    main.js   يربط الجميع
+  الوحدات (ES Modules) تتطلّب تشغيل الملفّ عبر خادم HTTP لا بفتحه
+  مباشرةً من القرص — انظر README.md.
+-->
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

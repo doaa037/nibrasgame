@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بلدتي المالية · העיירה הפיננסית שלי</title>
+<meta name="description" content="وحدتان تعليميتان للتربية المالية لطلاب الصف الثاني عشر: محاكاة تفاعلية ولعبة عالم مفتوح ثلاثية الأبعاد — عربي / עברית">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  /* ── الألوان نفسها المستخدمة داخل الوحدتين حتى تبدو الصفحة جزءاً منهما ── */
+  :root{
+    --royal:#0b1f3a; --royal-d:#071427; --royal-l:#16345c;
+    --gold:#d4af37; --gold-l:#e8cc6e; --gold-pale:#f5e9b2;
+    --ink:#eef2f7; --muted:#a9b6c8; --line:rgba(255,255,255,.12);
+    --font:'Cairo','Heebo',system-ui,sans-serif;
+  }
+  html[lang="he"]{ --font:'Heebo','Cairo',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;font-family:var(--font);color:var(--ink);
+    background:radial-gradient(1200px 600px at 50% -10%,var(--royal-l),var(--royal) 55%,var(--royal-d));
+    padding-block:2rem 3rem;padding-inline:clamp(16px,4vw,48px);
+  }
+  header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;max-width:1100px;margin-inline:auto}
+  .brand{display:flex;align-items:center;gap:.8rem}
+  .brand .logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:grid;place-items:center;font-size:1.5rem}
+  .brand small{display:block;color:var(--muted);font-size:.85rem}
+  .lang{display:flex;gap:.3rem;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;padding:.25rem}
+  .lang button{border:0;background:transparent;color:var(--muted);font-family:inherit;font-weight:600;padding:.35rem .9rem;border-radius:999px;cursor:pointer}
+  .lang button.on{background:var(--gold);color:var(--royal)}
+
+  .hero{max-width:1100px;margin:3rem auto 2.5rem;text-align:center}
+  .hero h1{font-size:clamp(1.9rem,4.5vw,3.2rem);font-weight:800;line-height:1.2}
+  .hero h1 span{color:var(--gold-pale)}
+  .hero p{color:var(--muted);max-width:60ch;margin:1rem auto 0;font-size:1.1rem;line-height:1.7}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:1.4rem;max-width:1100px;margin-inline:auto}
+  .card{
+    display:flex;flex-direction:column;gap:1rem;padding:1.6rem;border-radius:18px;
+    background:rgba(255,255,255,.05);border:1px solid var(--line);
+    box-shadow:0 20px 50px rgba(0,0,0,.35);transition:transform .2s,border-color .2s;
+  }
+  .card:hover{transform:translateY(-4px);border-color:var(--gold)}
+  .card .icon{font-size:2.4rem}
+  .card h2{font-size:1.45rem;font-weight:800}
+  .card .tag{display:inline-block;font-size:.8rem;color:var(--gold-pale);border:1px solid rgba(212,175,55,.4);border-radius:999px;padding:.15rem .7rem;margin-inline-start:.5rem;vertical-align:middle}
+  .card p{color:var(--muted);line-height:1.7;flex:1}
+  .card ul{color:var(--muted);line-height:1.8;padding-inline-start:1.2rem}
+  .btn{
+    display:inline-block;text-align:center;text-decoration:none;font-weight:800;padding:.85rem 1.4rem;border-radius:12px;
+    background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--royal);
+  }
+  .btn:hover{filter:brightness(1.06)}
+  .note{color:var(--muted);font-size:.85rem}
+
+  footer{max-width:1100px;margin:3rem auto 0;text-align:center;color:var(--muted);font-size:.9rem;line-height:1.8}
+  .num{unicode-bidi:isolate;direction:ltr}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">🏘️</div>
+    <div>
+      <strong data-i18n="brand">بلدتي المالية</strong>
+      <small data-i18n="brandSub">كلية القاسمي الأكاديمية — قسم التربية غير المنهجية</small>
+    </div>
+  </div>
+  <div class="lang" role="group" aria-label="language">
+    <button type="button" data-lang="ar" class="on">عربي</button>
+    <button type="button" data-lang="he">עברית</button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1 data-i18n-html="title">التربية المالية <span>كتجربة معيشة</span></h1>
+  <p data-i18n="lead">وحدتان تعليميتان لطلاب الصف الثاني عشر: تدخل بلدة عربية افتراضية بوضع مالي ابتدائي، وتتّخذ قرارات حقيقية تنعكس فوراً على رصيدك وديونك وتقرير ائتمانك. الخسارة هنا افتراضية، والدرس حقيقي.</p>
+</section>
+
+<main class="grid">
+  <article class="card">
+    <div class="icon">🗺️</div>
+    <h2><span data-i18n="simTitle">المحاكاة التفاعلية</span><span class="tag" data-i18n="simTag">تعمل على أيّ جهاز</span></h2>
+    <p data-i18n="simDesc">خريطة بلدة بأربع مؤسسات، بطاقة وضع مالي عشوائية، ومؤشّرات حيّة. ثمانية سيناريوهات تغطّي قسيمة الراتب، القروض والمينوس، التضخّم والادّخار، والاحتيال الرقمي — مع تغذية راجعة فورية وأثر على تقرير الائتمان.</p>
+    <ul>
+      <li data-i18n="simB1">مناسبة للحصّة الصفّية والهواتف</li>
+      <li data-i18n="simB2">أوسمة، لوحة متصدّرين، وتقرير ختامي للمعلّم</li>
+    </ul>
+    <a class="btn" href="./financial-sim/" data-i18n="simBtn">ابدأ المحاكاة</a>
+  </article>
+
+  <article class="card">
+    <div class="icon">🎮</div>
+    <h2><span data-i18n="gameTitle">لعبة العالم المفتوح 3D</span><span class="tag" data-i18n="gameTag">يتطلّب WebGL</span></h2>
+    <p data-i18n="gameDesc">عِش شهراً كاملاً في بلدة عربية ثلاثية الأبعاد: ابحث عن عمل، اقرأ قسيمة راتبك، اختر وسيلة تنقّلك، ادخل السوبرماركت وتسوّق بميزانية محدّدة، واجه أحداث الطريق، وادفع الإيجار في نهاية الشهر.</p>
+    <ul>
+      <li data-i18n="gameB1">مؤسسات تُدخَل فعلياً: البنك، مركز التشغيل، السوق، معرض السيارات</li>
+      <li data-i18n="gameB2">أفضل تجربة على حاسوب بلوحة مفاتيح</li>
+    </ul>
+    <a class="btn" href="./financial-town-3d/" data-i18n="gameBtn">ادخل البلدة</a>
+  </article>
+</main>
+
+<footer>
+  <div data-i18n="footer1">متوافق مع إطار OECD/PISA للتربية المالية ومتطلّبات وزارة المعارف · عربي / עברית</div>
+  <div data-i18n="footer2">د. دعاء مقاري — كلية القاسمي الأكاديمية</div>
+</footer>
+
+<script>
+  /* تبديل اللغة يقلب اتجاه الصفحة كلّها ويبدّل النصوص من جدول واحد */
+  const T = {
+    ar: {
+      brand: 'بلدتي المالية', brandSub: 'كلية القاسمي الأكاديمية — قسم التربية غير المنهجية',
+      title: 'التربية المالية <span>كتجربة معيشة</span>',
+      lead: 'وحدتان تعليميتان لطلاب الصف الثاني عشر: تدخل بلدة عربية افتراضية بوضع مالي ابتدائي، وتتّخذ قرارات حقيقية تنعكس فوراً على رصيدك وديونك وتقرير ائتمانك. الخسارة هنا افتراضية، والدرس حقيقي.',
+      simTitle: 'المحاكاة التفاعلية', simTag: 'تعمل على أيّ جهاز',
+      simDesc: 'خريطة بلدة بأربع مؤسسات، بطاقة وضع مالي عشوائية، ومؤشّرات حيّة. ثمانية سيناريوهات تغطّي قسيمة الراتب، القروض والمينوس، التضخّم والادّخار، والاحتيال الرقمي — مع تغذية راجعة فورية وأثر على تقرير الائتمان.',
+      simB1: 'مناسبة للحصّة الصفّية والهواتف', simB2: 'أوسمة، لوحة متصدّرين، وتقرير ختامي للمعلّم', simBtn: 'ابدأ المحاكاة',
+      gameTitle: 'لعبة العالم المفتوح 3D', gameTag: 'يتطلّب WebGL',
+      gameDesc: 'عِش شهراً كاملاً في بلدة عربية ثلاثية الأبعاد: ابحث عن عمل، اقرأ قسيمة راتبك، اختر وسيلة تنقّلك، ادخل السوبرماركت وتسوّق بميزانية محدّدة، واجه أحداث الطريق، وادفع الإيجار في نهاية الشهر.',
+      gameB1: 'مؤسسات تُدخَل فعلياً: البنك، مركز التشغيل، السوق، معرض السيارات', gameB2: 'أفضل تجربة على حاسوب بلوحة مفاتيح', gameBtn: 'ادخل البلدة',
+      footer1: 'متوافق مع إطار OECD/PISA للتربية المالية ومتطلّبات وزارة المعارف · عربي / עברית',
+      footer2: 'د. دعاء مقاري — كلية القاسمي الأكاديمية'
+    },
+    he: {
+      brand: 'העיירה הפיננסית שלי', brandSub: 'המכללה האקדמית אלקאסמי — המחלקה לחינוך בלתי פורמלי',
+      title: 'חינוך פיננסי <span>כחוויה נחיית</span>',
+      lead: 'שתי יחידות לימוד לתלמידי י״ב: נכנסים לעיירה ערבית וירטואלית עם מצב פיננסי התחלתי, ומקבלים החלטות אמיתיות שמשפיעות מיד על היתרה, החובות ודוח נתוני האשראי. ההפסד כאן וירטואלי, והלקח אמיתי.',
+      simTitle: 'הסימולציה האינטראקטיבית', simTag: 'עובד בכל מכשיר',
+      simDesc: 'מפת עיירה עם ארבעה מוסדות, כרטיס מצב פיננסי אקראי ומדדים חיים. שמונה תרחישים: תלוש שכר, הלוואות ומינוס, אינפלציה וחיסכון והונאות דיגיטליות — עם משוב מיידי והשפעה על דוח האשראי.',
+      simB1: 'מתאים לשיעור בכיתה ולטלפונים', simB2: 'תגים, טבלת מובילים ודוח מסכם למורה', simBtn: 'התחילו בסימולציה',
+      gameTitle: 'משחק העולם הפתוח 3D', gameTag: 'דורש WebGL',
+      gameDesc: 'חיו חודש שלם בעיירה ערבית תלת-ממדית: חפשו עבודה, קראו את תלוש השכר, בחרו איך להתנייד, היכנסו לסופרמרקט וקנו לפי תקציב מוגדר, התמודדו עם אירועי הדרך ושלמו שכר דירה בסוף החודש.',
+      gameB1: 'מוסדות שנכנסים אליהם באמת: בנק, לשכת תעסוקה, סופר, סוכנות רכב', gameB2: 'החוויה הטובה ביותר במחשב עם מקלדת', gameBtn: 'היכנסו לעיירה',
+      footer1: 'תואם למסגרת OECD/PISA לאוריינות פיננסית ולדרישות משרד החינוך · עברית / عربي',
+      footer2: 'ד״ר דועאא מקארי — המכללה האקדמית אלקאסמי'
+    }
+  };
+  function setLang(l) {
+    document.documentElement.lang = l;
+    document.documentElement.dir = 'rtl';
+    document.querySelectorAll('[data-i18n]').forEach(e => e.textContent = T[l][e.dataset.i18n]);
+    document.querySelectorAll('[data-i18n-html]').forEach(e => e.innerHTML = T[l][e.dataset.i18nHtml]);
+    document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('on', b.dataset.lang === l));
+    try { localStorage.setItem('nibras-lang', l); } catch (_) {}
+  }
+  document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+  let saved = 'ar';
+  try { saved = localStorage.getItem('nibras-lang') || 'ar'; } catch (_) {}
+  if (saved !== 'ar') setLang(saved);
+</script>
+</body>
+</html>

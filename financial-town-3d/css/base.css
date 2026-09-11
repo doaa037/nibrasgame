@@ -1,0 +1,128 @@
+/* ═══════════════════════════════════════════════════════════════════
+   base.css — الرموز التصميمية ودعم الاتجاهين RTL / LTR
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* الهوية البصرية متطابقة مع منصّة NFE AI Lab */
+  --royal:#0b2236; --royal-mid:#112d48; --royal-card:#153554; --royal-light:#1c4570;
+  --gold:#d4af37; --gold-l:#e8cc6e; --gold-pale:#f5e9b2; --gold-dim:rgba(212,175,55,.14);
+  --sky:#3f7fbf; --sky-l:#6aaae0;
+  --white:#f8f9fb; --dim:rgba(248,249,251,.70); --muted:rgba(248,249,251,.42);
+
+  --good:#3fbf7f; --good-l:#6ee0a6;
+  --warn:#e0a23f; --warn-l:#f0c67a;
+  --bad:#e05c5c;  --bad-l:#f08a8a;
+
+  --border:rgba(212,175,55,.24);
+  --bsoft:rgba(248,249,251,.10);
+  --rlg:18px; --rmd:13px; --rsm:9px;
+  --ease:.28s cubic-bezier(.4,0,.2,1);
+  --shadow:0 10px 42px rgba(0,0,0,.45);
+
+  /* يُضبط ديناميكياً من i18n.js حسب اللغة الفعّالة */
+  --font:'Cairo','Tajawal',system-ui,sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:var(--font);
+  background:var(--royal);
+  color:var(--white);
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+
+button,input{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+ul,ol{list-style:none}
+canvas{display:block}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.25)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+
+/* ═══════════════════════════════════════════════════════════════
+   دعم الاتجاهين
+   القاعدة: لا left/right في التخطيط إطلاقاً، بل الخصائص المنطقية
+   (inset-inline-start, margin-inline-*, border-inline-*) التي ينقلب
+   معناها تلقائياً حين يتغيّر dir على <html>.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* عزل اتجاهي للأرقام: تُكتب دائماً LTR حتى داخل نصّ عربي أو عبري،
+   و isolate يمنع «تسرّب» الاتجاه إلى الكلمات المجاورة */
+.num{
+  direction:ltr;
+  unicode-bidi:isolate;
+  display:inline-block;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+}
+
+kbd{
+  display:inline-block;direction:ltr;unicode-bidi:isolate;
+  padding:1px 7px;border-radius:5px;font-size:.78em;font-weight:800;
+  background:rgba(255,255,255,.12);border:1px solid var(--bsoft);
+  font-family:ui-monospace,monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   أدوات عامّة
+   ═══════════════════════════════════════════════════════════════ */
+.hidden{display:none!important}
+.grow{flex:1;min-width:0}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.good{color:var(--good-l)}
+.warn{color:var(--warn-l)}
+.bad{color:var(--bad-l)}
+.hl{color:var(--gold-pale);font-weight:800}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 24px;border-radius:50px;font-weight:800;font-size:.9rem;
+  transition:var(--ease);border:1px solid transparent;white-space:nowrap;
+}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--royal);
+  box-shadow:0 4px 18px rgba(212,175,55,.34)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,175,55,.48)}
+.btn-ghost{border-color:var(--border);background:rgba(255,255,255,.05)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:50px;
+  font-size:.74rem;font-weight:700;background:var(--gold-dim);
+  border:1px solid var(--border);color:var(--gold);
+}
+
+.lang-switch{
+  display:inline-flex;gap:4px;padding:4px;border-radius:50px;
+  background:rgba(0,0,0,.32);border:1px solid var(--border);
+}
+.lang-switch button{padding:6px 18px;border-radius:50px;font-size:.8rem;font-weight:800;
+  color:var(--dim);transition:var(--ease)}
+.lang-switch button[aria-pressed="true"]{
+  background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--royal)}
+.lang-mini{margin:0;flex-shrink:0}
+.lang-mini button{padding:4px 11px;font-size:.72rem}
+
+.bar{height:5px;border-radius:4px;background:rgba(0,0,0,.4);overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;border-radius:4px;background:var(--gold);
+  transition:width .45s cubic-bezier(.4,0,.2,1)}
+.bar.big{height:10px}
+
+/* ═══════════════════════════════════════════════════════════════
+   الحركات
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(.88);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+@keyframes shine{from{background-position:-220% 0}to{background-position:220% 0}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+}

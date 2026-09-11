@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════════════════════════════
+   base.css — الرموز التصميمية، التصفير، ودعم الاتجاهين RTL / LTR
+   بلدتي المالية | העיירה הפיננסית שלי
+   كلية القاسمي الأكاديمية — قسم التربية غير المنهجية
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── لوحة الألوان (متطابقة مع هوية منصة NFE AI Lab) ── */
+  --royal:#0b2236; --royal-mid:#112d48; --royal-card:#153554; --royal-light:#1c4570;
+  --gold:#d4af37; --gold-l:#e8cc6e; --gold-pale:#f5e9b2; --gold-dim:rgba(212,175,55,.14);
+  --sky:#3f7fbf; --sky-l:#6aaae0;
+  --white:#f8f9fb;
+  --dim:rgba(248,249,251,.68); --muted:rgba(248,249,251,.40);
+
+  /* ── ألوان دلالية للمؤشرات المالية ── */
+  --good:#3fbf7f; --good-l:#6ee0a6;
+  --warn:#e0a23f; --warn-l:#f0c67a;
+  --bad:#e05c5c;  --bad-l:#f08a8a;
+  --info:#6aaae0;
+
+  /* ── الأبعاد ── */
+  --border:rgba(212,175,55,.22);
+  --bsoft:rgba(248,249,251,.08);
+  --rlg:20px; --rmd:14px; --rsm:9px;
+  --ease:.32s cubic-bezier(.4,0,.2,1);
+  --sc:0 6px 40px rgba(0,0,0,.38);
+  --sg:0 8px 48px rgba(212,175,55,.18);
+
+  /* ── الخطوط: تُبدَّل ديناميكياً حسب اللغة عبر [data-lang] ── */
+  --font:'Cairo','Tajawal',system-ui,sans-serif;
+}
+
+/* الخط العبري يُحمَّل تلقائياً عند تبديل اللغة */
+html[data-lang="he"]{ --font:'Heebo','Rubik',system-ui,sans-serif; }
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+body{
+  font-family:var(--font);
+  background:var(--royal);
+  color:var(--white);
+  line-height:1.7;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* طبقة ضوضاء خفيفة تعطي عمقاً بصرياً للخلفية */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size:200px;
+}
+
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+ul,ol{list-style:none}
+img,svg{max-width:100%;display:block}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+
+/* ═══════════════════════════════════════════════════════════════════
+   دعم الاتجاهين — RTL / LTR
+   القاعدة: لا نستخدم left/right إطلاقاً في التخطيط، بل الخصائص
+   المنطقية (inline-start / inline-end) التي ينقلب معناها تلقائياً
+   عند تغيير خاصية dir على عنصر <html>.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.stack-start{ text-align:start }
+.stack-end{ text-align:end }
+
+/* عزل ثنائي الاتجاه للأرقام والعملة:
+   الأرقام تُكتب دائماً من اليسار لليمين حتى داخل نص عربي/عبري،
+   و unicode-bidi:isolate يمنع «تسرّب» الاتجاه إلى الكلمات المجاورة. */
+.num{
+  direction:ltr;
+  unicode-bidi:isolate;
+  display:inline-block;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+}
+
+/* الأيقونات التي تحمل معنى اتجاهياً (أسهم) تُعكس في وضع RTL */
+[dir="rtl"] .flip-dir{ transform:scaleX(-1) }
+
+/* ═══════════════════════════════════════════════════════════════════
+   أدوات عامة
+   ═══════════════════════════════════════════════════════════════════ */
+.hidden{display:none!important}
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.center{display:flex;align-items:center;justify-content:center}
+.row{display:flex;align-items:center;gap:10px}
+.wrap{flex-wrap:wrap}
+.grow{flex:1}
+.txt-dim{color:var(--dim)}
+.txt-muted{color:var(--muted)}
+.txt-good{color:var(--good-l)}
+.txt-warn{color:var(--warn-l)}
+.txt-bad{color:var(--bad-l)}
+.txt-gold{color:var(--gold)}
+
+/* ═══════════════════════════════════════════════════════════════════
+   الحركات
+   ═══════════════════════════════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(.86);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes shine{from{background-position:-220% 0}to{background-position:220% 0}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+.anim-up{animation:fadeUp .5s ease both}
+.anim-in{animation:fadeIn .4s ease both}
+.anim-pop{animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+}

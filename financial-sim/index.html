@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="بلدتي المالية — محاكاة مالية تفاعلية ثنائية اللغة (عربي/עברית) لطلاب الصف الثاني عشر، وفق إطار التربية المالية OECD/PISA. كلية القاسمي الأكاديمية — قسم التربية غير المنهجية."/>
+<meta name="theme-color" content="#0b2236"/>
+<title>بلدتي المالية | העיירה הפיננסית שלי</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b2236'/%3E%3Ctext y='72' x='50' font-size='58' text-anchor='middle'%3E%F0%9F%8F%98%EF%B8%8F%3C/text%3E%3C/svg%3E"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&family=Heebo:wght@400;600;700;800;900&family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/app.css"/>
+</head>
+<body>
+
+<!-- ═══ 1) شاشة البداية وتسجيل الدخول — تُبنى من ui.js ═══ -->
+<main id="screen-onboarding"></main>
+
+<!-- ═══ 2) شاشة اللعبة: المؤشّرات + خريطة البلدة + التحفيز ═══ -->
+<main id="screen-game" class="hidden"></main>
+
+<!-- ═══ 3) شاشة التقرير الختامي ═══ -->
+<main id="screen-summary" class="hidden"></main>
+
+<!-- حاوية النوافذ المنبثقة (السيناريوهات وتقارير الشهر) -->
+<div id="modalRoot"></div>
+
+<!-- حاوية إشعارات الأوسمة -->
+<div id="toastZone" class="toast-zone" aria-live="polite"></div>
+
+<!-- رسالة بديلة إن كان الجافاسكربت معطّلاً -->
+<noscript>
+  <div style="padding:40px;text-align:center">
+    هذا التطبيق يتطلّب تفعيل JavaScript في المتصفّح.<br/>
+    היישום דורש הפעלת JavaScript בדפדפן.
+  </div>
+</noscript>
+
+<!--
+  ترتيب التحميل مقصود ويعكس اتّجاه الاعتماديات:
+    i18n      → اللغة والاتجاه (لا يعتمد على شيء)
+    data      → البيانات الثابتة
+    scenarios → محتوى السيناريوهات
+    engine    → الحسابات المالية وإدارة الحالة (يعتمد على data)
+    ui        → العرض (يعتمد على i18n + engine + data)
+    app       → الربط والتشغيل (يعتمد على الجميع)
+  استُخدمت وسوم <script> تقليدية بدل وحدات ES حتى يعمل الملف
+  بالنقر المزدوج مباشرةً من القرص (file://) دون خادم محلّي.
+-->
+<script src="js/i18n.js"></script>
+<script src="js/data.js"></script>
+<script src="js/scenarios.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
