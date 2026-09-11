@@ -275,12 +275,13 @@ export class Interiors {
     const M = this.M;
     const R = this._room({ ox, oz, w: 20, d: 14, h: 3.6, floor: M.plaster(0x8d94a0), wall: M.plaster(0xeef0f2), lights: [2, 2], lightIntensity: 28, warm: 0xf4f7ff });
     R.id = 'employment';
-    /* استقبال */
-    R.add(box(4, 1.1, 1.0, M.plaster(0xd9d5cc), ox, 0.55, oz + 3.5));
-    R.add(npc(M, { shirt: 0x2f6f5e, pants: 0x2a2a30, hijab: true }, ox, oz + 5, Math.PI));
-    R.colliders.push(rect(ox, oz + 3.5, 4.2, 1.2), rect(ox, oz + 5, 0.8, 0.8));
-    R.hotspots.push({ id: 'reception', kind: 'npc', x: ox, z: oz + 2.2, radius: 2.0, action: 'location', target: 'employment' });
-    R.markers.push({ id: 'reception', kind: 'hotspot', cls: 'marker-hotspot', position: new THREE.Vector3(ox, 2.5, oz + 4),
+    /* استقبال — على يسار المدخل لا في وجهه، حتى لا يظهر اللاعب خلف المنضدة لحظة الدخول */
+    const rx = ox - 5.5;
+    R.add(box(4, 1.1, 1.0, M.plaster(0xd9d5cc), rx, 0.55, oz + 3.5));
+    R.add(npc(M, { shirt: 0x2f6f5e, pants: 0x2a2a30, hijab: true }, rx, oz + 5, Math.PI));
+    R.colliders.push(rect(rx, oz + 3.5, 4.2, 1.2), rect(rx, oz + 5, 0.8, 0.8));
+    R.hotspots.push({ id: 'reception', kind: 'npc', x: rx, z: oz + 2.2, radius: 2.0, action: 'location', target: 'employment' });
+    R.markers.push({ id: 'reception', kind: 'hotspot', cls: 'marker-hotspot', position: new THREE.Vector3(rx, 2.5, oz + 4),
                      html: () => `<span class="m-icon">🗂️</span><span class="m-name">${esc(t('receptionSays'))}</span>` });
     /* لوحة الوظائف */
     const jobLines = ['لوحة الوظائف · לוח משרות', ...JOBS.map(j => `${j.gross.toLocaleString('en-US')} ₪ · ${j.hours}`)];
