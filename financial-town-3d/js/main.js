@@ -684,10 +684,6 @@ class Game {
       this.ui.markers.setHighlight(q ? q.target : null);
     });
 
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest?.('[data-lang]');
-      if (btn) I18N.setLang(btn.dataset.lang);
-    });
   }
 
   togglePause() {
@@ -702,6 +698,11 @@ class Game {
    ═══════════════════════════════════════════════════════════════════ */
 function boot() {
   I18N.setLang(I18N.detectLang());
+  /* مبدّل اللغة يعمل في كل الشاشات: البداية، المُنشئ، الـHUD، والحوارات */
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest?.('[data-lang]');
+    if (btn) I18N.setLang(btn.dataset.lang);
+  });
   renderStartScreen();
 }
 
@@ -771,9 +772,9 @@ function renderStartScreen() {
         </div>
         <div class="panel">
           <label for="in-name">${esc(t('yourName'))}</label>
-          <input id="in-name" maxlength="28" autocomplete="off" placeholder="${esc(t('namePlace'))}" value="${esc(saved?.name || '')}"/>
+          <input id="in-name" maxlength="28" autocomplete="off" placeholder="${esc(t('namePlace'))}" value="${esc(typed.name)}"/>
           <label for="in-class">${esc(t('classroom'))}</label>
-          <input id="in-class" maxlength="20" autocomplete="off" placeholder="י״ב 3" value="${esc(saved?.classroom || '')}"/>
+          <input id="in-class" maxlength="20" autocomplete="off" placeholder="י״ב 3" value="${esc(typed.classroom)}"/>
           <p id="name-err" class="err hidden">${esc(t('nameNeeded'))}</p>
 
           <label>${esc(t('avStyle'))}</label>
@@ -825,14 +826,19 @@ function renderStartScreen() {
     preview = { rebuild, stop: () => { alive = false; renderer.dispose(); } };
   };
 
+  let launched = false;
+  let typed = { name: saved?.name || '', classroom: saved?.classroom || '' };
   const render = () => {
+    if (launched) return;                                /* بعد الدخول لا نعيد بناء الشاشة المخفيّة */
+    /* نحفظ ما كتبه الطالب قبل إعادة الرسم (تبديل اللغة أو النمط) */
+    if ($('#in-name')) typed = { name: $('#in-name').value, classroom: $('#in-class').value };
     preview?.stop(); preview = null;
     root.innerHTML = step === 'intro' ? renderIntro() : renderAvatar();
     root.scrollTop = 0;
 
     if (step === 'intro') {
       $('#btn-next').addEventListener('click', () => { step = 'avatar'; render(); });
-      $('#btn-resume')?.addEventListener('click', () => launch(saved));
+      $('#btn-resume')?.addEventListener('click', () => { launched = true; launch(saved); });
       return;
     }
 
@@ -851,7 +857,7 @@ function renderStartScreen() {
     $('#btn-start').addEventListener('click', () => {
       const name = $('#in-name').value.trim();
       if (!name) { $('#name-err').classList.remove('hidden'); $('#in-name').focus(); return; }
-      preview?.stop(); preview = null;
+      preview?.stop(); preview = null; launched = true;
       launch(State.createState(name, $('#in-class').value.trim(), appearance));
     });
   };
@@ -866,6 +872,7 @@ function launch(state) {
     return;
   }
   $('#start-screen').classList.add('hidden');
+  $('#start-screen').innerHTML = '';            /* نحرّر معاينة الأفاتار وسياق WebGL الخاصّ بها */
   $('#game-layer').classList.remove('hidden');
   window.game = new Game(state);   /* مرجع عامّ يفيد في التشخيص والاختبار */
 }

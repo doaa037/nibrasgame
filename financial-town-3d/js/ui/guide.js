@@ -46,7 +46,7 @@ export class Guide {
   /** الهدف الحالي: معرّف موقع، أو 'busStop' (أقرب محطّة)، أو null */
   setTarget(id, playerPos) {
     if (!id) { this.target = null; this.root.classList.add('hidden'); return; }
-    let x, z, name;
+    let x, z, nameKey;
     if (id === 'busStop') {
       let best = null, bd = Infinity;
       for (const s of BUS_STOPS) {
@@ -54,28 +54,29 @@ export class Guide {
         if (d < bd) { bd = d; best = s; }
       }
       const door = this.town.doors[best.id];
-      x = door.x; z = door.z; name = t('locBusStop');
+      x = door.x; z = door.z; nameKey = 'locBusStop';
     } else {
       const loc = LOCATIONS.find(l => l.id === id);
       const door = this.town.doors[id];
       if (!loc || !door) { this.target = null; this.root.classList.add('hidden'); return; }
-      x = door.x; z = door.z; name = t(loc.nameKey);
+      x = door.x; z = door.z; nameKey = loc.nameKey;
     }
-    this.target = { id, x, z, name };
+    this.target = { id, x, z, nameKey };   /* الاسم يُترجم عند العرض ليتبع تبديل اللغة */
     this.root.classList.remove('hidden');
   }
 
   /** نداء كل إطار من اللعبة */
   update(dt, player, camYaw, inside) {
     if (!this.target) return;
-    let tx = this.target.x, tz = this.target.z, label = t('guideTo'), name = this.target.name;
+    const targetName = t(this.target.nameKey);
+    let tx = this.target.x, tz = this.target.z, label = t('guideTo'), name = targetName;
 
     /* داخل مبنى غير الهدف: نوجّه إلى باب الخروج */
     if (inside) {
       if (inside.id === this.target.id) { label = ''; name = t('guideArrived'); }
       else {
         const exit = inside.hotspots.find(h => h.kind === 'exit');
-        if (exit) { tx = exit.x; tz = exit.z; label = `${t('guideQuestAt')} ${this.target.name}`; name = t('guideExit'); }
+        if (exit) { tx = exit.x; tz = exit.z; label = `${t('guideQuestAt')} ${targetName}`; name = t('guideExit'); }
       }
     }
 

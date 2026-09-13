@@ -16,10 +16,21 @@
     }
   ],
   "routes": [
-    { "src": "/financial-sim/?$", "dest": "/financial-sim/index.html" },
-    { "src": "/financial-town-3d/?$", "dest": "/financial-town-3d/index.html" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/financial-sim/?$",
+      "dest": "/financial-sim/index.html"
+    },
+    {
+      "src": "/financial-town-3d/?$",
+      "dest": "/financial-town-3d/index.html"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ],
   "headers": [
     {
@@ -36,6 +47,10 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600"
+        },
+        {
+          "key": "x-vercel-skip-toolbar",
+          "value": "1"
         }
       ]
     }

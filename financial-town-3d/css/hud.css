@@ -74,6 +74,8 @@
 .clock-time{font-size:1.3rem;font-weight:900;color:var(--gold-pale);line-height:1.1}
 .clock-date{font-size:.7rem;color:var(--dim)}
 .clock-mode{font-size:.68rem;color:var(--muted);margin-top:3px}
+.hud-lang{margin-top:8px;pointer-events:auto}
+.hud-lang button{padding:3px 10px;font-size:.68rem}
 
 /* متتبّع المهمّة */
 .hud-quest{
@@ -384,8 +386,12 @@
    ═══════════════════════════════════════════════════════════════ */
 #start-screen{
   position:fixed;inset:0;z-index:60;overflow-y:auto;
-  display:flex;align-items:center;justify-content:center;padding:34px 18px;
+  display:flex;align-items:flex-start;justify-content:center;padding:34px 18px;
 }
+/* margin:auto يوسّط المحتوى القصير ويسمح بتمرير الطويل من أوّله —
+   align-items:center كان يدفع رأس الصفحة (ومبدّل اللغة) خارج الشاشة */
+#start-screen .start-inner{margin:auto}
+.start-inner .lang-switch{margin-bottom:6px}
 .start-bg{
   position:absolute;inset:0;pointer-events:none;
   background:

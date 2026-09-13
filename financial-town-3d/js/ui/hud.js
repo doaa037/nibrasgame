@@ -11,6 +11,7 @@ import { esc, money, num, frac } from './util.js';
 import { safetyIndex } from '../sim/economy.js';
 import { clockString, hasBusPass } from '../sim/state.js';
 import { activeQuest } from '../content/quests.js';
+import { list as langList, getLang } from '../content/i18n.js';
 import { CAR } from '../content/config.js';
 
 export class HUD {
@@ -33,6 +34,9 @@ export class HUD {
           <div class="clock-time" data-f="clock">08:00</div>
           <div class="clock-date" data-f="date"></div>
           <div class="clock-mode" data-f="mode"></div>
+          <div class="lang-switch lang-mini hud-lang">
+            ${langList().map(l => `<button type="button" data-lang="${l.code}" aria-pressed="${l.code === getLang()}">${esc(l.label)}</button>`).join('')}
+          </div>
         </div>
       </div>
 
