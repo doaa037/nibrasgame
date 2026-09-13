@@ -10,13 +10,17 @@ import { ECONOMY, TIME } from '../content/config.js';
 import { clamp, round } from './economy.js';
 
 const STORAGE_KEY = 'finTown3D.save';
+import { normalizeAppearance } from '../content/avatar.js';
+
 const SAVE_VERSION = 1;
 
 /** حالة بداية جديدة */
-export function createState(name, classroom) {
+export function createState(name, classroom, appearance = null) {
   return {
     version: SAVE_VERSION,
     name, classroom: classroom || '',
+    appearance: normalizeAppearance(appearance),   /* مظهر الشخصية كما بناه الطالب */
+    introSeen: false,                              /* الافتتاحية السينمائية تُعرض مرّة */
     startedAt: Date.now(),
 
     /* ── المال ── */
@@ -134,7 +138,10 @@ export function load() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    return (s && s.version === SAVE_VERSION && s.name) ? s : null;
+    if (!(s && s.version === SAVE_VERSION && s.name)) return null;
+    s.appearance = normalizeAppearance(s.appearance);   /* حفظ من قبل المُنشئ */
+    if (s.introSeen === undefined) s.introSeen = true;
+    return s;
   } catch (e) { return null; }
 }
 

@@ -8,10 +8,12 @@
 
 import * as THREE from 'three';
 import { PLAYER, WORLD } from '../content/config.js';
+import { normalizeAppearance } from '../content/avatar.js';
 
 export class Player {
-  constructor(scene, M, startPos = { x: -60, z: -34 }, lookAt = { x: 0, z: 0 }) {
+  constructor(scene, M, startPos = { x: -60, z: -34 }, lookAt = { x: 0, z: 0 }, appearance = null) {
     this.M = M;
+    this.appearance = normalizeAppearance(appearance);
     this.position = new THREE.Vector3(startPos.x, 0, startPos.z);
     this.velocity = new THREE.Vector3();
     /* الشخصية والكاميرا تبدآن موجّهتين نحو مركز البلدة، فأوّل ما يراه
@@ -37,41 +39,19 @@ export class Player {
 
   /* ─────────────── بناء الشخصية ─────────────── */
   _build() {
-    const M = this.M;
-    const mesh = (geo, mat, x, y, z) => {
-      const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; return m;
-    };
-
-    /* جذع بكتفين أعرض من الخصر، ورأس كروي بشعر — يقرأ كإنسان لا كصندوق */
-    this.torso = mesh(new THREE.BoxGeometry(0.58, 0.66, 0.32), M.shirt, 0, 1.18, 0);
-    const waist = mesh(new THREE.BoxGeometry(0.5, 0.18, 0.28), M.pants, 0, 0.78, 0);
-    this.head = mesh(new THREE.SphereGeometry(0.21, 18, 14), M.skin, 0, 1.76, 0);
-    const hair = mesh(new THREE.SphereGeometry(0.225, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), M.hair, 0, 1.79, 0);
-    const neck = mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.14, 10), M.skin, 0, 1.56, 0);
-
-    this.armL = this._limb(0.15, 0.6, M.shirt, M.skin, -0.38, 1.46);
-    this.armR = this._limb(0.15, 0.6, M.shirt, M.skin,  0.38, 1.46);
-    this.legL = this._limb(0.19, 0.76, M.pants, M.shoes, -0.15, 0.78);
-    this.legR = this._limb(0.19, 0.76, M.pants, M.shoes,  0.15, 0.78);
-
-    /* حقيبة ظهر صغيرة — تفصيلة تُميّز الطالب */
-    const bag = mesh(new THREE.BoxGeometry(0.4, 0.46, 0.16), M.plaster(0x8a3a3a), 0, 1.2, -0.24);
-
-    this.group.add(this.torso, waist, this.head, hair, neck, this.armL, this.armR, this.legL, this.legR, bag);
+    const fig = buildFigure(this.appearance);
+    this.group.add(fig.group);
+    this.torso = fig.torso; this.head = fig.head;
+    this.armL = fig.armL; this.armR = fig.armR; this.legL = fig.legL; this.legR = fig.legR;
   }
 
-  /** طرف من جزأين (كمّ/جلد أو بنطال/حذاء) يدور من الكتف أو الورك */
-  _limb(w, len, upperMat, lowerMat, x, y) {
-    const pivot = new THREE.Group();
-    pivot.position.set(x, y, 0);
-    const upper = new THREE.Mesh(new THREE.BoxGeometry(w, len * 0.55, w), upperMat);
-    upper.position.y = -len * 0.275;
-    const lower = new THREE.Mesh(new THREE.BoxGeometry(w * 0.92, len * 0.45, w * 0.92), lowerMat);
-    lower.position.y = -len * 0.775;
-    upper.castShadow = lower.castShadow = true;
-    pivot.add(upper, lower);
-    return pivot;
+  /** تغيير المظهر أثناء اللعب (من المُنشئ) */
+  setAppearance(appearance) {
+    this.appearance = normalizeAppearance(appearance);
+    while (this.group.children.length) this.group.remove(this.group.children[0]);
+    this._build();
   }
+
 
   /* ═══════════════════════════════════════════════════════════════
      التحديث لكل إطار
@@ -93,8 +73,10 @@ export class Player {
     const { x: ix, y: iy } = input.axis;
     const target = new THREE.Vector3();
     if (ix !== 0 || iy !== 0) {
+      /* الكاميرا عند (sin yaw, cos yaw) خلف اللاعب، فالأمام هو
+         (−sin, −cos) واليمين على الشاشة هو (cos, −sin). */
       const sin = Math.sin(this.camYaw), cos = Math.cos(this.camYaw);
-      target.set(ix * cos - iy * sin, 0, ix * sin + iy * cos).normalize();
+      target.set(ix * cos - iy * sin, 0, -(ix * sin + iy * cos)).normalize();
     }
 
     const maxSpeed = input.run ? PLAYER.RUN_SPEED : PLAYER.WALK_SPEED;
@@ -285,4 +267,60 @@ function shortestAngle(from, to) {
   if (diff > Math.PI) diff -= Math.PI * 2;
   if (diff < -Math.PI) diff += Math.PI * 2;
   return diff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   بناء الجسم من المظهر — مشترك بين اللعبة ومعاينة مُنشئ الشخصية
+   ═══════════════════════════════════════════════════════════════════ */
+const mat = (color, roughness = 0.85) => new THREE.MeshStandardMaterial({ color, roughness });
+
+/** طرف من جزأين (كمّ/جلد أو بنطال/حذاء) يدور من الكتف أو الورك */
+function limb(w, len, upperMat, lowerMat, x, y) {
+  const pivot = new THREE.Group();
+  pivot.position.set(x, y, 0);
+  const upper = new THREE.Mesh(new THREE.BoxGeometry(w, len * 0.55, w), upperMat);
+  upper.position.y = -len * 0.275;
+  const lower = new THREE.Mesh(new THREE.BoxGeometry(w * 0.92, len * 0.45, w * 0.92), lowerMat);
+  lower.position.y = -len * 0.775;
+  upper.castShadow = lower.castShadow = true;
+  pivot.add(upper, lower);
+  return pivot;
+}
+
+/**
+ * يبني شخصية من صناديق وكرات وفق المظهر المختار ويعيد المراجع التي
+ * يحتاجها الأنيميشن. لا ملفّات نماذج: يُحمَّل فوراً حتى على أجهزة المدرسة.
+ */
+export function buildFigure(appearance) {
+  const a = normalizeAppearance(appearance);
+  const skin = mat(a.skin, 0.75), shirt = mat(a.shirt), pants = mat(a.pants, 0.9),
+        hair = mat(a.hair, 0.9), shoes = mat(0x1b1b1b, 0.8), scarf = mat(a.scarf, 0.9);
+  const group = new THREE.Group();
+  const mesh = (geo, m, x, y, z) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; group.add(o); return o; };
+
+  const torso = mesh(new THREE.BoxGeometry(0.58, 0.66, 0.32), shirt, 0, 1.18, 0);
+  mesh(new THREE.BoxGeometry(0.5, 0.18, 0.28), pants, 0, 0.78, 0);
+  const head = mesh(new THREE.SphereGeometry(0.21, 18, 14), skin, 0, 1.76, 0);
+  mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.14, 10), skin, 0, 1.56, 0);
+
+  if (a.style === 'hijab') {
+    /* حجاب: غطاء رأس يمتدّ إلى الكتفين، والوجه مكشوف */
+    mesh(new THREE.SphereGeometry(0.235, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.62), scarf, 0, 1.79, 0);
+    mesh(new THREE.BoxGeometry(0.52, 0.36, 0.36), scarf, 0, 1.5, -0.02);
+  } else if (a.style === 'girl') {
+    /* شعر طويل: قبّعة الشعر + ضفيرة خلفية */
+    mesh(new THREE.SphereGeometry(0.228, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.6), hair, 0, 1.79, 0);
+    mesh(new THREE.BoxGeometry(0.3, 0.5, 0.14), hair, 0, 1.5, -0.2);
+  } else {
+    mesh(new THREE.SphereGeometry(0.225, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), hair, 0, 1.79, 0);
+  }
+
+  const armL = limb(0.15, 0.6, shirt, skin, -0.38, 1.46), armR = limb(0.15, 0.6, shirt, skin, 0.38, 1.46);
+  const legL = limb(0.19, 0.76, pants, shoes, -0.15, 0.78), legR = limb(0.19, 0.76, pants, shoes, 0.15, 0.78);
+  group.add(armL, armR, legL, legR);
+
+  /* حقيبة ظهر — تفصيلة تُميّز الطالب */
+  mesh(new THREE.BoxGeometry(0.4, 0.46, 0.16), mat(a.bag, 0.8), 0, 1.2, -0.24);
+
+  return { group, torso, head, armL, armR, legL, legR };
 }

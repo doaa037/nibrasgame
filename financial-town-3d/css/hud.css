@@ -470,3 +470,73 @@
   .sheet,.card-mini,.badge,.log{border-color:#ccc!important;background:#fff!important}
   .card-mini b,.sheet tr.sum td:last-child{color:#8a6d1f!important}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   الافتتاحية ومُنشئ الشخصية
+   ═══════════════════════════════════════════════════════════════ */
+.start-inner.wide{max-width:900px}
+.start-inner h1.small{font-size:clamp(1.4rem,4vw,2rem);margin-top:26px}
+.row.center{justify-content:center;gap:12px;flex-wrap:wrap;margin:6px 0 4px}
+.story{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:8px 0 18px}
+.story-card{
+  padding:16px 14px;border-radius:var(--rmd);text-align:start;
+  background:linear-gradient(160deg,var(--royal-card),var(--royal-mid));border:1px solid var(--bsoft);
+}
+.story-card span{display:block;font-size:1.7rem;margin-bottom:8px}
+.story-card p{font-size:.8rem;line-height:1.75;color:var(--dim)}
+.goals{
+  text-align:start;margin:0 auto 18px;padding:14px 20px;max-width:560px;border-radius:var(--rmd);
+  background:var(--gold-dim);border:1px solid var(--border);
+}
+.goals b{display:block;color:var(--gold-pale);font-size:.86rem;margin-bottom:6px}
+.goals ul{padding-inline-start:18px;font-size:.82rem;line-height:1.9;color:var(--white)}
+
+.builder{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;text-align:start}
+.preview{
+  position:sticky;top:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px;
+  border-radius:var(--rlg);background:radial-gradient(ellipse at 50% 80%,rgba(63,127,191,.25),transparent 70%),
+  linear-gradient(160deg,var(--royal-card),var(--royal));border:1px solid var(--border);
+}
+.preview canvas{width:100%;max-width:300px;height:auto;aspect-ratio:4/5;display:block}
+.btn.sm{padding:8px 16px;font-size:.8rem}
+.styles{display:flex;gap:8px;margin-bottom:12px}
+.style-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:var(--rmd);
+  background:rgba(0,0,0,.25);border:1px solid var(--bsoft);color:var(--dim);font-family:inherit;font-size:.76rem;font-weight:700;cursor:pointer;
+}
+.style-btn span{font-size:1.5rem}
+.style-btn[aria-pressed="true"]{border-color:var(--gold);color:var(--white);background:var(--gold-dim)}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.sw{
+  width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.18);cursor:pointer;
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);transition:transform var(--ease);
+}
+.sw:hover{transform:scale(1.1)}
+.sw[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim),inset 0 0 0 2px rgba(0,0,0,.25)}
+@media (max-width:760px){
+  .builder{grid-template-columns:1fr}
+  .preview{position:static}
+  .preview canvas{max-width:220px}
+}
+
+/* الافتتاحية داخل اللعبة */
+#intro-overlay{
+  position:fixed;inset:0;z-index:55;display:flex;align-items:flex-end;justify-content:center;padding:0 18px 9vh;
+  background:linear-gradient(to top,rgba(4,13,22,.82),rgba(4,13,22,.15) 45%,transparent 70%);
+  animation:fadeIn .8s ease both;cursor:pointer;
+}
+#intro-overlay.out{animation:fadeIn .5s ease reverse both}
+.intro-card{max-width:640px;text-align:center;animation:fadeUp 1s .4s ease both}
+.intro-chip{
+  display:inline-block;background:var(--gold);color:var(--royal);font-weight:900;font-size:.8rem;
+  padding:5px 16px;border-radius:50px;margin-bottom:12px;direction:ltr;
+}
+.intro-card h2{font-size:clamp(1.4rem,4vw,2.2rem);font-weight:900;margin-bottom:8px;text-shadow:0 4px 22px rgba(0,0,0,.6)}
+.intro-card p{font-size:.95rem;line-height:1.8;color:var(--dim);text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.intro-goal{
+  display:inline-flex;gap:10px;align-items:center;margin:14px 0 10px;padding:10px 18px;border-radius:var(--rmd);
+  background:rgba(7,22,34,.85);border:1px solid var(--border);
+}
+.intro-goal b{color:var(--gold-pale);font-size:.8rem}
+.intro-goal span{font-weight:700;font-size:.92rem}
+.intro-card small{display:block;color:var(--muted);font-size:.74rem;margin-top:6px}

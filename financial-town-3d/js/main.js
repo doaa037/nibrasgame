@@ -10,7 +10,8 @@ import * as THREE from 'three';
 import { Engine3D } from './core/engine3d.js';
 import { Input } from './core/input.js';
 import { Town } from './world/town.js';
-import { Player } from './world/player.js';
+import { Player, buildFigure } from './world/player.js';
+import { STYLES, SKINS, HAIRS, SCARFS, SHIRTS, PANTS, BAGS, randomAppearance, normalizeAppearance, hex } from './content/avatar.js';
 import { PlayerCar, Bus } from './world/vehicles.js';
 import { createMaterials } from './world/materials.js';
 import { Environment } from './world/environment.js';
@@ -64,7 +65,7 @@ class Game {
     /* نبدأ على الرصيف أمام البيت لا في منتصف الشارع: أوّل لقطة
        يراها الطالب يجب أن تُظهر البلدة، لا الأسفلت. */
     const spawn = this.town.doors.home;
-    this.player = new Player(this.engine.scene, this.materials, { x: spawn.x, z: spawn.z - 4 });
+    this.player = new Player(this.engine.scene, this.materials, { x: spawn.x, z: spawn.z - 4 }, { x: 0, z: 0 }, state.appearance);
     this.car = new PlayerCar(this.engine.scene, this.materials);
     this.bus = new Bus(this.engine.scene, this.materials);
     this.input = new Input(window);
@@ -94,6 +95,10 @@ class Game {
     this._restoreWorld();
     this._bindInput();
     this._bindLanguage();
+    /* الافتتاحية: الكاميرا تهبط من فوق البلدة إلى خلف الشخصية، مع بطاقة
+       تعرّف الطالب بيومه الأوّل ومهمّته. تُعرض مرّة واحدة لكل شخصية جديدة. */
+    this.intro = this.state.introSeen ? null : { t: 0, dur: 7.5, skipAt: 0.8 };
+    if (this.intro) this._showIntroCard();
     this.engine.onUpdate((dt) => this.update(dt));
     this.engine.start();
 
@@ -111,6 +116,7 @@ class Game {
      حلقة التحديث
      ═══════════════════════════════════════════════════════════════ */
   update(dt) {
+    if (this.intro) { this._updateIntro(dt); return; }
     const frozen = this.ui.dialog.open || this.transitioning;
     this._setFrozen(frozen);
     const colliders = this.inside ? this.inside.colliders : this.town.colliders;
@@ -145,6 +151,60 @@ class Game {
     }
 
     this.ui.hud.update(this.state);
+  }
+
+  /* ─────────────── الافتتاحية ─────────────── */
+  _updateIntro(dt) {
+    const it = this.intro;
+    it.t += dt;
+    this._setFrozen(true);
+    const p = this.player, cam = this.engine.camera;
+    /* من علوّ 70 م فوق وسط البلدة إلى موضع كاميرا المتابعة خلف اللاعب */
+    const k = Math.min(1, it.t / it.dur);
+    const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    const yaw = p.camYaw, dist = p.camDistance;
+    const end = new THREE.Vector3(p.position.x + Math.sin(yaw) * dist, PLAYER.CAM_HEIGHT + p.camPitch * dist, p.position.z + Math.cos(yaw) * dist);
+    const start = new THREE.Vector3(p.position.x * 0.35 + 30, 72, p.position.z * 0.35 + 90);
+    cam.position.lerpVectors(start, end, e);
+    const look = new THREE.Vector3().lerpVectors(new THREE.Vector3(0, 4, -10), new THREE.Vector3(p.position.x, p.position.y + 1.9, p.position.z), e);
+    cam.lookAt(look);
+    p.update(dt, this.input, [], true);
+    this.environment.setHour(this.state.hour + this.state.minute / 60);
+    this.environment.update(dt, this.player.position);
+    this.materials.setNight(this.environment.nightFactor);
+    this.ui.markers.update(cam.position);
+    this.ui.hud.update(this.state);
+    if (k >= 1) this._endIntro();
+  }
+
+  _showIntroCard() {
+    const el = document.createElement('div');
+    el.id = 'intro-overlay';
+    const goal = QUESTS[0];
+    el.innerHTML = `
+      <div class="intro-card">
+        <div class="intro-chip">${esc(t('hDay'))} 1 · 08:00</div>
+        <h2>${esc(t('introHello').replace('{name}', this.state.name))}</h2>
+        <p>${esc(t('introBody'))}</p>
+        <div class="intro-goal"><b>${esc(t('introFirstGoal'))}</b><span>${esc(t(goal.title))}</span></div>
+        <small>${esc(t('introSkip'))}</small>
+      </div>`;
+    document.body.appendChild(el);
+    const skip = () => { if (this.intro && this.intro.t > this.intro.skipAt) this._endIntro(); };
+    el.addEventListener('click', skip);
+    this._introKey = (e) => { if (!e.repeat) skip(); };
+    window.addEventListener('keydown', this._introKey);
+  }
+
+  _endIntro() {
+    if (!this.intro) return;
+    this.intro = null;
+    this.state.introSeen = true;
+    State.save(this.state);
+    window.removeEventListener('keydown', this._introKey);
+    const el = $('#intro-overlay');
+    if (el) { el.classList.add('out'); setTimeout(() => el.remove(), 600); }
+    this._setFrozen(false);
   }
 
   _setFrozen(v) {
@@ -631,56 +691,153 @@ function boot() {
 function renderStartScreen() {
   const saved = State.load();
   const root = $('#start-screen');
+  let step = 'intro';                                   /* intro → avatar */
+  let appearance = normalizeAppearance(saved?.appearance || randomAppearance());
+  let preview = null;                                   /* معاينة ثلاثية الأبعاد */
 
-  const render = () => {
-    root.innerHTML = `
-      <div class="start-bg"></div>
-      <div class="start-inner">
-        <div class="lang-switch">
-          ${I18N.list().map(l => `<button data-lang="${l.code}"
-            aria-pressed="${l.code === I18N.getLang()}">${esc(l.label)}</button>`).join('')}
+  const langSwitch = () => `<div class="lang-switch">
+    ${I18N.list().map(l => `<button data-lang="${l.code}" aria-pressed="${l.code === I18N.getLang()}">${esc(l.label)}</button>`).join('')}
+  </div>`;
+
+  /* ── الخطوة 1: الافتتاحية — القصّة والهدف والتحكّم ── */
+  const renderIntro = () => `
+    <div class="start-bg"></div>
+    <div class="start-inner wide">
+      ${langSwitch()}
+      <div class="brand">🏘️</div>
+      <h1>${esc(t('gameName'))}</h1>
+      <p class="chip">${esc(t('tagline'))}</p>
+      <p class="lead">${esc(t('intro'))}</p>
+
+      <div class="story">
+        ${[['💼', 'story1'], ['🚌', 'story2'], ['🏦', 'story3'], ['🛒', 'story4']].map(([ic, k]) =>
+          `<div class="story-card"><span>${ic}</span><p>${esc(t(k))}</p></div>`).join('')}
+      </div>
+
+      <div class="goals">
+        <b>${esc(t('monthGoalsTitle'))}</b>
+        <ul>${['goal1', 'goal2', 'goal3'].map(k => `<li>${esc(t(k))}</li>`).join('')}</ul>
+      </div>
+
+      <div class="row center">
+        ${saved ? `<button id="btn-resume" class="btn btn-ghost">${esc(t('resume'))} · ${esc(saved.name)}</button>` : ''}
+        <button id="btn-next" class="btn btn-gold">${esc(t('buildCharacter'))} ←</button>
+      </div>
+
+      <div class="controls-help">
+        <b>${esc(t('controls'))}</b>
+        <span><kbd>W A S D</kbd> ${esc(t('ctrlMove'))}</span>
+        <span><kbd>Shift</kbd> ${esc(t('ctrlRun'))}</span>
+        <span><kbd>E</kbd> ${esc(t('ctrlInteract'))}</span>
+        <span><kbd>F</kbd> ${esc(t('ctrlCar'))}</span>
+        <span><kbd>P</kbd> ${esc(t('ctrlPhone'))}</span>
+        <span>🖱️ ${esc(t('dragToLook'))}</span>
+      </div>
+      <p class="fine">${esc(t('college'))}</p>
+      <p class="fine">${esc(t('oecdNote'))}</p>
+    </div>`;
+
+  /* ── الخطوة 2: مُنشئ الشخصية ── */
+  const swatches = (key, list) => `<div class="swatches" data-key="${key}">
+    ${list.map(c => `<button type="button" class="sw" data-val="${c}" aria-pressed="${appearance[key] === c}" style="background:${hex(c)}"></button>`).join('')}
+  </div>`;
+  const renderAvatar = () => `
+    <div class="start-bg"></div>
+    <div class="start-inner wide">
+      ${langSwitch()}
+      <h1 class="small">${esc(t('buildCharacter'))}</h1>
+      <p class="lead">${esc(t('buildLead'))}</p>
+      <div class="builder">
+        <div class="preview">
+          <canvas id="avatar-canvas" width="320" height="400"></canvas>
+          <button id="btn-random" class="btn btn-ghost sm">🎲 ${esc(t('surpriseMe'))}</button>
         </div>
-
-        <div class="brand">🏘️</div>
-        <h1>${esc(t('gameName'))}</h1>
-        <p class="chip">${esc(t('tagline'))}</p>
-        <p class="lead">${esc(t('intro'))}</p>
-
         <div class="panel">
           <label for="in-name">${esc(t('yourName'))}</label>
-          <input id="in-name" maxlength="28" autocomplete="off"
-                 placeholder="${esc(t('namePlace'))}" value="${esc(saved?.name || '')}"/>
+          <input id="in-name" maxlength="28" autocomplete="off" placeholder="${esc(t('namePlace'))}" value="${esc(saved?.name || '')}"/>
           <label for="in-class">${esc(t('classroom'))}</label>
-          <input id="in-class" maxlength="20" autocomplete="off"
-                 placeholder="י״ב 3" value="${esc(saved?.classroom || '')}"/>
+          <input id="in-class" maxlength="20" autocomplete="off" placeholder="י״ב 3" value="${esc(saved?.classroom || '')}"/>
           <p id="name-err" class="err hidden">${esc(t('nameNeeded'))}</p>
 
+          <label>${esc(t('avStyle'))}</label>
+          <div class="styles">${STYLES.map(st => `<button type="button" class="style-btn" data-style="${st.id}" aria-pressed="${appearance.style === st.id}"><span>${st.icon}</span>${esc(t(st.name))}</button>`).join('')}</div>
+          <label>${esc(t('avSkin'))}</label>${swatches('skin', SKINS)}
+          <label class="hair-l ${appearance.style === 'hijab' ? 'hidden' : ''}">${esc(t('avHair'))}</label>${appearance.style === 'hijab' ? '' : swatches('hair', HAIRS)}
+          <label class="scarf-l ${appearance.style !== 'hijab' ? 'hidden' : ''}">${esc(t('avScarf'))}</label>${appearance.style === 'hijab' ? swatches('scarf', SCARFS) : ''}
+          <label>${esc(t('avShirt'))}</label>${swatches('shirt', SHIRTS)}
+          <label>${esc(t('avPants'))}</label>${swatches('pants', PANTS)}
+          <label>${esc(t('avBag'))}</label>${swatches('bag', BAGS)}
+
           <div class="row">
-            ${saved ? `<button id="btn-resume" class="btn btn-ghost">${esc(t('resume'))}</button>` : ''}
+            <button id="btn-back" class="btn btn-ghost">→ ${esc(t('back'))}</button>
             <button id="btn-start" class="btn btn-gold">${esc(t('enterTown'))} ←</button>
           </div>
         </div>
+      </div>
+    </div>`;
 
-        <div class="controls-help">
-          <b>${esc(t('controls'))}</b>
-          <span><kbd>W A S D</kbd> ${esc(t('ctrlMove'))}</span>
-          <span><kbd>Shift</kbd> ${esc(t('ctrlRun'))}</span>
-          <span><kbd>E</kbd> ${esc(t('ctrlInteract'))}</span>
-          <span><kbd>F</kbd> ${esc(t('ctrlCar'))}</span>
-          <span><kbd>P</kbd> ${esc(t('ctrlPhone'))}</span>
-          <span>🖱️ ${esc(t('dragToLook'))}</span>
-        </div>
+  /* معاينة ثلاثية الأبعاد صغيرة تدور ببطء — نفس بنّاء الشخصية في اللعبة */
+  const startPreview = () => {
+    const canvas = $('#avatar-canvas');
+    if (!canvas || !Engine3D.isSupported()) return;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(320, 400, false);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 320 / 400, 0.1, 50);
+    camera.position.set(0, 1.35, 5.2); camera.lookAt(0, 1.05, 0);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 1.1));
+    const sun = new THREE.DirectionalLight(0xfff1dc, 1.6); sun.position.set(2, 4, 3); scene.add(sun);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.08, 40), new THREE.MeshStandardMaterial({ color: 0x1c4570, roughness: 0.6 }));
+    disc.position.y = -0.04; scene.add(disc);
+    let fig = null;
+    const rebuild = () => { if (fig) scene.remove(fig.group); fig = buildFigure(appearance); scene.add(fig.group); };
+    rebuild();
+    let phase = 0, alive = true, last = performance.now();
+    const loop = (now) => {
+      if (!alive) return;
+      requestAnimationFrame(loop);
+      const dt = Math.min(0.05, (now - last) / 1000); last = now; phase += dt;
+      /* وجه الشخصية نحو −z، فنديرها نصف دورة لتواجه الكاميرا وتتمايل يميناً ويساراً */
+      fig.group.rotation.y = Math.PI + Math.sin(phase * 0.7) * 0.8;
+      const swing = Math.sin(phase * 2.2) * 0.12;
+      fig.armL.rotation.x = swing; fig.armR.rotation.x = -swing;
+      renderer.render(scene, camera);
+    };
+    requestAnimationFrame(loop);
+    preview = { rebuild, stop: () => { alive = false; renderer.dispose(); } };
+  };
 
-        <p class="fine">${esc(t('college'))}</p>
-        <p class="fine">${esc(t('oecdNote'))}</p>
-      </div>`;
+  const render = () => {
+    preview?.stop(); preview = null;
+    root.innerHTML = step === 'intro' ? renderIntro() : renderAvatar();
+    root.scrollTop = 0;
 
+    if (step === 'intro') {
+      $('#btn-next').addEventListener('click', () => { step = 'avatar'; render(); });
+      $('#btn-resume')?.addEventListener('click', () => launch(saved));
+      return;
+    }
+
+    startPreview();
+    root.querySelectorAll('.style-btn').forEach(b => b.addEventListener('click', () => {
+      appearance.style = b.dataset.style; render(); $('#in-name').blur();
+    }));
+    root.querySelectorAll('.swatches').forEach(sw => sw.addEventListener('click', (e) => {
+      const b = e.target.closest('.sw'); if (!b) return;
+      appearance[sw.dataset.key] = +b.dataset.val;
+      sw.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', x === b));
+      preview?.rebuild();
+    }));
+    $('#btn-random').addEventListener('click', () => { appearance = randomAppearance(); render(); });
+    $('#btn-back').addEventListener('click', () => { step = 'intro'; render(); });
     $('#btn-start').addEventListener('click', () => {
       const name = $('#in-name').value.trim();
       if (!name) { $('#name-err').classList.remove('hidden'); $('#in-name').focus(); return; }
-      launch(State.createState(name, $('#in-class').value.trim()));
+      preview?.stop(); preview = null;
+      launch(State.createState(name, $('#in-class').value.trim(), appearance));
     });
-    $('#btn-resume')?.addEventListener('click', () => launch(saved));
   };
 
   I18N.onChange(render);
