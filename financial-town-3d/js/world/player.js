@@ -294,7 +294,7 @@ function limb(w, len, upperMat, lowerMat, x, y) {
 export function buildFigure(appearance) {
   const a = normalizeAppearance(appearance);
   const skin = mat(a.skin, 0.75), shirt = mat(a.shirt), pants = mat(a.pants, 0.9),
-        hair = mat(a.hair, 0.9), shoes = mat(0x1b1b1b, 0.8), scarf = mat(a.scarf, 0.9);
+        hair = mat(a.hair, 0.9), shoes = mat(0x1b1b1b, 0.8);
   const group = new THREE.Group();
   const mesh = (geo, m, x, y, z) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; group.add(o); return o; };
 
@@ -303,11 +303,7 @@ export function buildFigure(appearance) {
   const head = mesh(new THREE.SphereGeometry(0.21, 18, 14), skin, 0, 1.76, 0);
   mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.14, 10), skin, 0, 1.56, 0);
 
-  if (a.style === 'hijab') {
-    /* حجاب: غطاء رأس يمتدّ إلى الكتفين، والوجه مكشوف */
-    mesh(new THREE.SphereGeometry(0.235, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.62), scarf, 0, 1.79, 0);
-    mesh(new THREE.BoxGeometry(0.52, 0.36, 0.36), scarf, 0, 1.5, -0.02);
-  } else if (a.style === 'girl') {
+  if (a.style === 'girl') {
     /* شعر طويل: قبّعة الشعر + ضفيرة خلفية */
     mesh(new THREE.SphereGeometry(0.228, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.6), hair, 0, 1.79, 0);
     mesh(new THREE.BoxGeometry(0.3, 0.5, 0.14), hair, 0, 1.5, -0.2);

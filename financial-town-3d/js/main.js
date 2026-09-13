@@ -11,7 +11,7 @@ import { Engine3D } from './core/engine3d.js';
 import { Input } from './core/input.js';
 import { Town } from './world/town.js';
 import { Player, buildFigure } from './world/player.js';
-import { STYLES, SKINS, HAIRS, SCARFS, SHIRTS, PANTS, BAGS, randomAppearance, normalizeAppearance, hex } from './content/avatar.js';
+import { STYLES, SKINS, HAIRS, SHIRTS, PANTS, BAGS, randomAppearance, normalizeAppearance, hex } from './content/avatar.js';
 import { PlayerCar, Bus } from './world/vehicles.js';
 import { createMaterials } from './world/materials.js';
 import { Environment } from './world/environment.js';
@@ -762,8 +762,7 @@ function renderStartScreen() {
           <label>${esc(t('avStyle'))}</label>
           <div class="styles">${STYLES.map(st => `<button type="button" class="style-btn" data-style="${st.id}" aria-pressed="${appearance.style === st.id}"><span>${st.icon}</span>${esc(t(st.name))}</button>`).join('')}</div>
           <label>${esc(t('avSkin'))}</label>${swatches('skin', SKINS)}
-          <label class="hair-l ${appearance.style === 'hijab' ? 'hidden' : ''}">${esc(t('avHair'))}</label>${appearance.style === 'hijab' ? '' : swatches('hair', HAIRS)}
-          <label class="scarf-l ${appearance.style !== 'hijab' ? 'hidden' : ''}">${esc(t('avScarf'))}</label>${appearance.style === 'hijab' ? swatches('scarf', SCARFS) : ''}
+          <label>${esc(t('avHair'))}</label>${swatches('hair', HAIRS)}
           <label>${esc(t('avShirt'))}</label>${swatches('shirt', SHIRTS)}
           <label>${esc(t('avPants'))}</label>${swatches('pants', PANTS)}
           <label>${esc(t('avBag'))}</label>${swatches('bag', BAGS)}
