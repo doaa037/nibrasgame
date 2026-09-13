@@ -798,8 +798,8 @@ function renderStartScreen() {
       if (!alive) return;
       requestAnimationFrame(loop);
       const dt = Math.min(0.05, (now - last) / 1000); last = now; phase += dt;
-      /* وجه الشخصية نحو −z، فنديرها نصف دورة لتواجه الكاميرا وتتمايل يميناً ويساراً */
-      fig.group.rotation.y = Math.PI + Math.sin(phase * 0.7) * 0.8;
+      /* وجه الشخصية نحو +z حيث الكاميرا؛ تتمايل يميناً ويساراً لتُرى من الجانبين */
+      fig.group.rotation.y = Math.sin(phase * 0.7) * 0.8;
       const swing = Math.sin(phase * 2.2) * 0.12;
       fig.armL.rotation.x = swing; fig.armR.rotation.x = -swing;
       renderer.render(scene, camera);
