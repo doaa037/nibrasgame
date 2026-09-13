@@ -16,6 +16,8 @@ import { PlayerCar, Bus } from './world/vehicles.js';
 import { createMaterials } from './world/materials.js';
 import { Environment } from './world/environment.js';
 import { Interiors } from './world/interior.js';
+import { Beacon } from './world/beacon.js';
+import { Guide } from './ui/guide.js';
 import { ShoppingUI } from './ui/shopping.js';
 import { createCart, addToCart, removeFromCart, evaluateCart } from './sim/shopping.js';
 import { WEEKLY_MISSION } from './content/shop.data.js';
@@ -80,6 +82,8 @@ class Game {
     };
     this.ui.panels = new Panels(this.ui.dialog);
     this.ui.shop = new ShoppingUI($('#cart-hud'), this.ui.dialog);
+    this.ui.guide = new Guide($('#guide'), this.town);
+    this.beacon = new Beacon(this.engine.scene);
     this.ui.markers.build(this.town.markers);
 
     this.actions = createActions(this);
@@ -93,6 +97,7 @@ class Game {
     this.pendingCar = null;
 
     this._restoreWorld();
+    this._updateGuide();
     this._bindInput();
     this._bindLanguage();
     /* الافتتاحية: الكاميرا تهبط من فوق البلدة إلى خلف الشخصية، مع بطاقة
@@ -142,6 +147,9 @@ class Game {
 
     if (this.inside) this.ui.markersInside.update(this.engine.camera.position);
     else this.ui.markers.update(this.engine.camera.position);
+    this.ui.guide.update(dt, this.player, this.player.camYaw, this.inside);
+    this.beacon.group.visible = !this.inside && !!this.ui.guide.target;
+    this.beacon.update(dt);
 
     if (!frozen) {
       this._advanceTime(dt);
@@ -562,9 +570,18 @@ class Game {
     for (const b of checkBadges(this.state)) this.ui.toasts.show({
       icon: b.icon, title: { ar: `🏅 ${t('newBadge')}`, he: `🏅 ${t('newBadge')}` }, body: b.name });
 
-    const q = activeQuest(this.state);
-    this.ui.markers.setHighlight(q ? q.target : null);
+    this._updateGuide();
     State.save(this.state);
+  }
+
+  /** الهدف الحالي للتوجيه: باب مؤسسة المهمّة، أو أقرب محطّة حافلات */
+  _updateGuide() {
+    const q = activeQuest(this.state);
+    const id = q ? q.target : null;
+    this.ui.markers.setHighlight(id);
+    this.ui.guide.setTarget(id, this.player.position);
+    if (this.ui.guide.target) this.beacon.setPosition(this.ui.guide.target.x, this.ui.guide.target.z);
+    else this.beacon.hide();
   }
 
   /* ═══════════════════════════════════════════════════════════════
